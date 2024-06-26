@@ -12,12 +12,12 @@ function closeModal(modal) {
     document.removeEventListener('mouseup', closeModalOnOverlay);
 }
   
-// закрытие попапа оверлей
+// Закрытие попапа оверлей
 function closeModalOnOverlay(evt) {
-    if (evt.target.classList.contains('popup_is-opened')) {
-      const openedPopup = document.querySelector('.popup_is-opened');
+  const openedPopup = document.querySelector('.popup_is-opened');
+  if (evt.target === openedPopup) {
       closeModal(openedPopup);
-    }
+  }
 }
   
 // закрытие попапа на Esc

@@ -42,23 +42,18 @@ initialCards.forEach((cardElement) => {
 const profileEditButton = document.querySelector('.profile__edit-button');
 //кнопка формы добавления новой карточки
 const profileAddBButton = document.querySelector('.profile__add-button');
-
 //попап редактирования профиля
 const popupEditProfile = document.querySelector('.popup_type_edit');
 //попап добавления новой карточки на страницу
 const popupAddCard = document.querySelector('.popup_type_new-card');
-
 // выберираем элементы, куда должны быть вставлены значения полей
 const profileTitle = document.querySelector('.profile__title');
 const profileDescription = document.querySelector('.profile__description');
 
-// прикрепляем обработчик к кнопке открытия попапа редакитрования профиля
+// Прикрепляем обработчик к кнопке открытия попапа редактирования профиля
 profileEditButton.addEventListener('click', () => {
-  profileNameInput.value =
-    document.querySelector('.profile__title').textContent;
-  profileJobInput.value = document.querySelector(
-    '.profile__description'
-  ).textContent;
+  profileNameInput.value = profileTitle.textContent;
+  profileJobInput.value = profileDescription.textContent;
   openModal(popupEditProfile);
 });
 
@@ -68,7 +63,6 @@ profileAddBButton.addEventListener('click', () => {
   //очищаем форму после закрытия
   newPlaceFormElement.reset();
 });
-
 // находим форму редактирования профиля в DOM
 const editProfileFormElement = document.forms['edit-profile'];
 

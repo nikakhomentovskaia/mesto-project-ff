@@ -4,14 +4,13 @@ function getCardTemplate() {
 }
 
 const cardTemplate = getCardTemplate();
-
+  
 function getCardElement() {
     return cardTemplate.querySelector('.card').cloneNode(true);
 }
+// не знаю, как перенести константу, тк карточки исчезают
   
-// увеличенное изображение
 const popupImage = document.querySelector('.popup_type_image');
-  
 // удаление карточки
 function removeCard(card) {
     card.remove();
