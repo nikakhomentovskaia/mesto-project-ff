@@ -8,9 +8,7 @@ const cardTemplate = getCardTemplate();
 function getCardElement() {
     return cardTemplate.querySelector('.card').cloneNode(true);
 }
-// не знаю, как перенести константу, тк карточки исчезают
-  
-const popupImage = document.querySelector('.popup_type_image');
+
 // удаление карточки
 function removeCard(card) {
     card.remove();
@@ -39,7 +37,7 @@ cardElement
     });
 
 cardImage.addEventListener('click', () => {
-    openModalImage({ name, link }, popupImage);
+    openModalImage({ name, link });
 });
 
 const likesContainer = cardElement.querySelector('.card__description');

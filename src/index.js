@@ -20,16 +20,18 @@ closeModalButtons.forEach((button) => {
     closeModal(e.target.closest('.popup'));
   });
 });
+// благодарю за разъяснения, теперь все поняла!
+const popupImage = document.querySelector('.popup_type_image');
 
 // функция открытия попапа с картинкой
-function openModalImage({ link, name }, modal) {
+function openModalImage({ link, name }) {
   //наполняем содержимым элемент изображения
   openModalImagelink.src = link;
   openModalImageName.textContent = name;
   openModalImageName.alt = name;
 
   // открываем попап с картинкой
-  openModal(modal);
+  openModal(popupImage);
 }
 
 // выводим карточки на страницу
