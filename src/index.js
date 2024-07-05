@@ -1,129 +1,195 @@
-import './pages/index.css'; // импорт главного файла стилей
-import { initialCards } from './components/cards';
-import { removeCard, likeCard, createCard } from './components/card';
-import { openModal, closeModal } from './components/modal';
+import "../pages/index.css";
+import * as modal from "../components/modal.js";
+import * as card from "../components/card.js";
+import * as validation from "../components/validation.js";
+import * as api from "../components/api.js";
 
-//находим элемент контейнера с карточками
-export const placesList = document.querySelector('.places__list');
+const editProfileButton = document.querySelector(".profile__edit-button");
+const addCardButton = document.querySelector(".profile__add-button");
+const avatarButton = document.querySelector(".profile__avatar-button");
+const editPopup = document.querySelector(".popup_type_edit");
+const newCardPopup = document.querySelector(".popup_type_new-card");
+const editAvatarPopup = document.querySelector(".popup_type_avatar");
+const closePopupButtons = document.querySelectorAll(".popup__close");
+const profileTitle = document.querySelector(".profile__title");
+const profileDescription = document.querySelector(".profile__description");
+const profileImg = document.querySelector(".profile__image");
 
-//все кнопки закрытия попапов
-const closeModalButtons = document.querySelectorAll('.popup__close');
+const cardPopup = document.querySelector(".popup_type_image");
+const cardPopupImg = document.querySelector(".popup__image");
+const cardPopupTitle = document.querySelector(".popup__caption");
 
-//элемент картинки попапа
-const openModalImagelink = document.querySelector('.popup__image');
-//подпись элемента картинки попапа
-const openModalImageName = document.querySelector('.popup__caption');
+const popupAvatarForm = document.forms["edit-avatar"];
+const avatarInput = popupAvatarForm.elements.avatar;
+let userId;
 
-// закрытия попапа по крестику
-closeModalButtons.forEach((button) => {
-  button.addEventListener('click', (e) => {
-    closeModal(e.target.closest('.popup'));
+const popupProfileForm = document.forms["edit-profile"];
+const popupInputProfileName = popupProfileForm.elements.name;
+const popupInputProfileDescription = popupProfileForm.elements.description;
+
+avatarButton.addEventListener("click", function () {
+  modal.openModal(editAvatarPopup);
+  avatarInput.value = "";
+  validation.clearValidation(popupAvatarForm, validationConfig);
+});
+
+function handleProfileFormSubmit(evt) {
+  evt.preventDefault();
+  const popupElement = document.querySelector(".popup_is-opened");
+  renderLoading(true, popupElement);
+
+  api
+    .editProfileInfo({
+      name: popupInputProfileName.value,
+      about: popupInputProfileDescription.value,
+    })
+    .then((data) => {
+      profileTitle.textContent = data.name;
+      profileDescription.textContent = data.about;
+      modal.closeModal(editPopup);
+    })
+    .catch((error) => {
+      console.error("Произошла ошибка:", error);
+    })
+    .finally(() => {
+      renderLoading(false, popupElement);
+    });
+}
+
+popupProfileForm.addEventListener("submit", handleProfileFormSubmit);
+
+editProfileButton.addEventListener("click", () => {
+  popupInputProfileName.value = profileTitle.textContent;
+  popupInputProfileDescription.value = profileDescription.textContent;
+  modal.openModal(editPopup);
+  validation.clearValidation(popupProfileForm, validationConfig);
+});
+
+const popupNewCardForm = document.forms["new-place"];
+const popupInputCardName = popupNewCardForm.elements["place-name"];
+const popupInputCardLink = popupNewCardForm.elements.link;
+
+function handleCardFormSubmit(evt) {
+  evt.preventDefault();
+  const popupElement = document.querySelector(".popup_is-opened");
+  renderLoading(true, popupElement);
+
+  api
+    .newCard({
+      name: popupInputCardName.value,
+      link: popupInputCardLink.value,
+    })
+    .then((newCard) => {
+      card.placesList.prepend(
+        card.createCard(
+          newCard.name,
+          newCard.link,
+          card.deleteCard,
+          card.likeCard,
+          handleImageClick,
+          newCard.likes,
+          userId,
+          newCard._id,
+          newCard.owner._id
+        )
+      );
+    })
+    .then(() => {
+      modal.closeModal(newCardPopup);
+    })
+    .catch((error) => {
+      console.error("Произошла ошибка:", error);
+    })
+    .finally(() => {
+      renderLoading(false, popupElement);
+    });
+  popupNewCardForm.reset();
+}
+
+popupNewCardForm.addEventListener("submit", handleCardFormSubmit);
+
+addCardButton.addEventListener("click", () => {
+  modal.openModal(newCardPopup);
+  validation.clearValidation(popupNewCardForm, validationConfig);
+});
+
+closePopupButtons.forEach((item) => {
+  const popup = item.closest(".popup");
+  item.addEventListener("click", () => modal.closeModal(popup));
+});
+
+const validationConfig = {
+  formSelector: ".popup__form",
+  inputSelector: ".popup__input",
+  submitButtonSelector: ".popup__button",
+  inactiveButtonClass: "popup__button_disabled",
+  inputErrorClass: "popup__input_type_error",
+  errorClass: "popup__error_visible",
+};
+
+window.addEventListener("load", function () {
+  validation.enableValidation(validationConfig);
+});
+
+Promise.all([api.getUserInfo(), api.getInitialCards()])
+  .then(([userData, cardData]) => {
+    profileDescription.textContent = userData.about;
+    profileTitle.textContent = userData.name;
+    profileImg.style = `background-image: url('${userData.avatar}')`;
+    userId = userData._id;
+
+    cardData.forEach(function (cardElem) {
+      card.placesList.append(
+        card.createCard(
+          cardElem.name,
+          cardElem.link,
+          card.deleteCard,
+          card.likeCard,
+          handleImageClick,
+          cardElem.likes,
+          userId,
+          cardElem._id,
+          cardElem.owner._id
+        )
+      );
+    });
+  })
+  .catch((error) => {
+    console.error("Произошла ошибка:", error);
   });
-});
 
-const popupImage = document.querySelector('.popup_type_image');
-
-// функция открытия попапа с картинкой
-function openModalImage({ link, name }) {
-  //наполняем содержимым элемент изображения
-  openModalImagelink.src = link;
-  openModalImageName.textContent = name;
-  openModalImageName.alt = name;
-
-  // открываем попап с картинкой
-  openModal(popupImage);
+function renderLoading(isLoading, popupElement) {
+  const activeButton = popupElement.querySelector(".popup__button");
+  if (isLoading) {
+    activeButton.textContent = "Сохранение...";
+  } else {
+    activeButton.textContent = "Сохранить";
+  }
 }
 
-// выводим карточки на страницу
-initialCards.forEach((cardElement) => {
-  const newCard = createCard(cardElement, removeCard, openModalImage, likeCard);
-  placesList.append(newCard);
+popupAvatarForm.addEventListener("submit", function (evt) {
+  evt.preventDefault();
+  const popupElement = document.querySelector(".popup_is-opened");
+  renderLoading(true, popupElement);
+
+  api
+    .editAvatar(avatarInput.value)
+    .then((data) => {
+      userAvatar.style.backgroundImage = `url('${data.avatar}')`;
+      modal.closeModal(editAvatarPopup);
+    })
+    .catch((error) => {
+      console.error("Произошла ошибка:", error);
+    })
+    .finally(() => {
+      renderLoading(false, popupElement);
+    });
 });
 
-//кнопка формы редактирвоания профиля
-const profileEditButton = document.querySelector('.profile__edit-button');
-//кнопка формы добавления новой карточки
-const profileAddBButton = document.querySelector('.profile__add-button');
-//попап редактирования профиля
-const popupEditProfile = document.querySelector('.popup_type_edit');
-//попап добавления новой карточки на страницу
-const popupAddCard = document.querySelector('.popup_type_new-card');
-// выберираем элементы, куда должны быть вставлены значения полей
-const profileTitle = document.querySelector('.profile__title');
-const profileDescription = document.querySelector('.profile__description');
+function handleImageClick(evt) {
+  cardPopupImg.alt = evt.target.alt;
+  cardPopupImg.src = evt.target.src;
+  cardPopupTitle.textContent = evt.target.alt;
 
-// Прикрепляем обработчик к кнопке открытия попапа редактирования профиля
-profileEditButton.addEventListener('click', () => {
-  profileNameInput.value = profileTitle.textContent;
-  profileJobInput.value = profileDescription.textContent;
-  openModal(popupEditProfile);
-});
-
-// прикрепляем обработчик к кнопке открытия попапа добавления карточки
-profileAddBButton.addEventListener('click', () => {
-  openModal(popupAddCard);
-  //очищаем форму после закрытия
-  newPlaceFormElement.reset();
-});
-// находим форму редактирования профиля в DOM
-const editProfileFormElement = document.forms['edit-profile'];
-
-// находим поля редактирования формы профиля в DOM
-const profileNameInput = editProfileFormElement.elements.name;
-const profileJobInput = editProfileFormElement.elements.description;
-
-// Обработчик «отправки» формы, хотя пока
-// она никуда отправляться не будет
-function handleEditFormSubmit(evt) {
-  evt.preventDefault(); // Эта строчка отменяет стандартную отправку формы.
-  // Так мы можем определить свою логику отправки.
-
-  // получаем значение полей jobInput и nameInput из свойства value
-  const profileNameInputValue = profileNameInput.value;
-  const profileJobInputValue = profileJobInput.value;
-
-  // вставляем новые значения с помощью textContent
-  profileTitle.textContent = profileNameInputValue;
-  profileDescription.textContent = profileJobInputValue;
-
-  //закрываем попап по клику на кнопку сохранить
-  closeModal(popupEditProfile);
+  modal.openModal(cardPopup);
 }
-
-// Прикрепляем обработчик к форме:
-// он будет следить за событием “submit” - «отправка»
-editProfileFormElement.addEventListener('submit', handleEditFormSubmit);
-
-// находим форму добавления карчтоки в DOM
-const newPlaceFormElement = document.forms['new-place'];
-
-// находим поля формы добавления карточки в DOM
-const placeNameInput = newPlaceFormElement.elements['place-name'];
-const placeLinkInput = newPlaceFormElement.elements.link;
-
-// Обработчик «отправки» формы, хотя пока
-function handleAddFormSubmit(evt) {
-  evt.preventDefault(); // Эта строчка отменяет стандартную отправку формы.
-  // Так мы можем определить свою логику отправки.
-
-  // Получаем объект новой карточки
-  const newCard = createCard(
-    {
-      name: placeNameInput.value,
-      link: placeLinkInput.value,
-    },
-    removeCard,
-    openModalImage,
-    likeCard
-  );
-
-  //вставляем карточку в начало
-  placesList.prepend(newCard);
-
-  //закрываем попап по клику на кнопку сохранить
-  closeModal(popupAddCard);
-}
-
-// Прикрепляем обработчик к форме:
-// он будет следить за событием “submit” - «отправка»
-newPlaceFormElement.addEventListener('submit', handleAddFormSubmit);

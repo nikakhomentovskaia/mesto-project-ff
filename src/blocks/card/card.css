@@ -13,3 +13,18 @@
   position: relative;
   overflow: hidden;
 }
+
+.card__like {
+  display: grid;
+  grid-template-rows: repeat(2, 1fr);
+  justify-items: center;
+  gap: 3px;
+}
+
+.card__like-counter {
+  font-family: Inter, sans-serif;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 15.73px;
+  text-align: center;
+}
