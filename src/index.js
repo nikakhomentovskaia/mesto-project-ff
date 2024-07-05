@@ -20,7 +20,7 @@ closeModalButtons.forEach((button) => {
     closeModal(e.target.closest('.popup'));
   });
 });
-// благодарю за разъяснения, теперь все поняла!
+
 const popupImage = document.querySelector('.popup_type_image');
 
 // функция открытия попапа с картинкой
