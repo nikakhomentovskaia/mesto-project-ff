@@ -7,90 +7,91 @@ const config = {
 };
   
   // Обработка ответа с сервера
-const checkResponse = (res) => {
-    if (res.ok) {
-      return res.json();
+const handleResponse = (res) => {
+    if (!res.ok) {
+      throw new Error(`Ошибка ${res.status}`);
     }
-    return Promise.reject(`Ошибка: ${res.status}`);
+  
+    return res.json();
 };
   
-  // Функция для избежания дублирования кода
-const fetchData = (url, options) => {
-    return fetch(url, options)
-      .then(checkResponse)
-      .catch((err) => console.log(err));
+// Функция для избежания дублирования кода 
+const fetchData = (url, options) => { 
+    return fetch(url, options) 
+    .then(checkResponse) 
 };
-  
-  // Загрузка
-export const renderLoading = (isLoading) => {
-    document.querySelectorAll(".popup__button").forEach(button => {
-      button.textContent = isLoading ? "Сохранение..." : "Сохранить";
-    });
-};
-  
+
+
   // Вызов информации о пользователе
-export const infoForMe = () => {
-    return fetchData(`${config.baseUrl}/users/me`, { headers: config.headers });
-};
+export function getUserInfo() {
+    return fetch(`${config.baseUrl}/users/me`, {
+      headers: config.headers,
+    }).then(handleResponse);
+}
   
   // Вызов карточек
-export const getInitialCards = () => {
-    return fetchData(`${config.baseUrl}/cards`, { headers: config.headers });
-};
+export function getInitialCards() {
+    return fetch(`${config.baseUrl}/cards`, {
+      headers: config.headers,
+    }).then(handleResponse);
+}
+  
   
   // Отправка инфо о новой аватарке
-export const editAvatar = (formEditLink) => {
-    return fetchData(`${config.baseUrl}/users/me/avatar`, {
-      method: "PATCH",
-      headers: config.headers,
-      body: JSON.stringify({ avatar: formEditLink.value }),
-    }).finally(() => renderLoading(false));
-};
-  
-  // Отправка отредактированной инфо профиля
-export const editProfile = (formEditName, formEditDescription) => {
-    return fetchData(`${config.baseUrl}/users/me`, {
+export function editAvatar(avatar) {
+    return fetch(`${config.baseUrl}/users/me/avatar`, {
       method: "PATCH",
       headers: config.headers,
       body: JSON.stringify({
-        name: formEditName.value,
-        about: formEditDescription.value,
+        avatar: avatar,
       }),
-    }).finally(() => renderLoading(false));
+    }).then(handleResponse);
+}
+  
+  // Отправка отредактированной инфо профиля
+  export const editProfile = (formEditName, formEditDescription) => { 
+    return fetchData(`${config.baseUrl}/users/me`, { 
+        method: "PATCH", 
+        headers: config.headers, 
+        body: JSON.stringify({ 
+            name: formEditName.value, 
+            about: formEditDescription.value, 
+        }), 
+    });
 };
   
   // Отправка карточки
-export const postNewCard = (item) => {
-    return fetchData(`${config.baseUrl}/cards`, {
+export function getNewCard({ name, link }) {
+    return fetch(`${config.baseUrl}/cards`, {
       method: "POST",
       headers: config.headers,
       body: JSON.stringify({
-        name: item.name,
-        link: item.link,
+        name: name,
+        link: link,
       }),
-    }).finally(() => renderLoading(false));
-};
+    }).then(handleResponse);
+}
   
   // Запрос на удаление карточки
-export const deleteCardServer = (cardId) => {
-    return fetchData(`${config.baseUrl}/cards/${cardId}`, {
+export function deleteCard(cardId) {
+    return fetch(`${config.baseUrl}/cards/${cardId}`, {
       method: "DELETE",
       headers: config.headers,
-    });
-};
+    }).then(handleResponse);
+}
   
   // Отправка инфо о лайке
-export const putLikeServer = (cardId) => {
-    return fetchData(`${config.baseUrl}/cards/likes/${cardId}`, {
+export function addLike(cardId) {
+    return fetch(`${config.baseUrl}/cards/likes/${cardId}`, {
       method: "PUT",
       headers: config.headers,
-    });
-};
+    }).then(handleResponse);
+}
   
   // Отправка инфо о снятии лайка
-export const deleteLikeServer = (cardId) => {
-    return fetchData(`${config.baseUrl}/cards/likes/${cardId}`, {
+export function deleteLike(cardId) {
+    return fetch(`${config.baseUrl}/cards/likes/${cardId}`, {
       method: "DELETE",
       headers: config.headers,
-    });
-};
+    }).then(handleResponse);
+}

@@ -1,18 +1,20 @@
+import { config } from "webpack";
+
 // Функция добавляет класс с ошибкой
 const showInputError = (formElement, inputElement, errorMessage) => {
     const errorElement = formElement.querySelector(`.popup__input-${inputElement.name}-error`);
-    inputElement.classList.add("popup__input_type_error");
+    inputElement.classList.add(config.inputTypeErrorClass);
     errorElement.textContent = errorMessage;
-    errorElement.classList.add("popup__input-error_active");
-  };
+    errorElement.classList.add(config.errorClassActive);
+};
   
   // Функция удаляет класс с ошибкой
-  const hideInputError = (formElement, inputElement) => {
+const hideInputError = (formElement, inputElement) => {
     const errorElement = formElement.querySelector(`.popup__input-${inputElement.name}-error`);
-    inputElement.classList.remove("popup__input_type_error");
-    errorElement.classList.remove("popup__input-error_active");
+    inputElement.classList.remove(config.inputTypeErrorClass);
+    errorElement.classList.remove(config.errorClassActive);
     errorElement.textContent = "";
-  };
+};
   
   // Функция проверки валидности
   const isValid = (formElement, inputElement) => {
@@ -64,11 +66,21 @@ const showInputError = (formElement, inputElement, errorMessage) => {
     });
   };
   
-  // Функция очистки валидации при закрытии попапа
-  export const clearValidation = () => {
-    document.querySelectorAll(".popup__form").forEach(formElement => {
-      formElement.querySelectorAll(".popup__input").forEach(inputElement => {
-        hideInputError(formElement, inputElement);
-      });
+// Функция очистки валидации при закрытии попапа
+export const clearValidation = (formElement, config) => {
+    formElement.querySelectorAll(config.inputSelector).forEach(inputElement => {
+        hideInputError(formElement, inputElement, config);
     });
-  };
+
+    const submitButton = formElement.querySelector(config.submitButtonSelector);
+    submitButton.disabled = true;
+    submitButton.classList.add(config.inactiveButtonClass);
+};
+
+// Функция удаляет класс с ошибкой
+function hideInputError(formElement, inputElement, config) {
+    const errorElement = formElement.querySelector(`.${config.inputErrorClass}-${inputElement.name}-error`);
+    inputElement.classList.remove(config.inputTypeErrorClass);
+    errorElement.classList.remove(config.errorClassActive);
+    errorElement.textContent = "";
+}

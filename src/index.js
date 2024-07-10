@@ -1,8 +1,8 @@
-import "../pages/index.css";
-import * as modal from "../components/modal.js";
-import * as card from "../components/card.js";
-import * as validation from "../components/validation.js";
-import * as api from "../components/api.js";
+import "./pages/index.css";
+import * as modal from "./components/modal.js";
+import * as card from "./components/card.js";
+import * as validation from "./components/validation.js";
+import * as api from "./components/api.js";
 
 const editProfileButton = document.querySelector(".profile__edit-button");
 const addCardButton = document.querySelector(".profile__add-button");
@@ -161,7 +161,7 @@ Promise.all([api.getUserInfo(), api.getInitialCards()])
 function renderLoading(isLoading, popupElement) {
   const activeButton = popupElement.querySelector(".popup__button");
   if (isLoading) {
-    activeButton.textContent = "Сохранение...";
+    activeButton.textContent = isLoading ? "Сохранение..." : "Сохранить";
   } else {
     activeButton.textContent = "Сохранить";
   }

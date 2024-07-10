@@ -53,11 +53,8 @@ export function createCard(
 }
 
 export function deleteCard(card, cardId) {
-  const popupElement = document.querySelector(".popup_is-opened");
-
   api.deleteCard(cardId).then(() => {
     card.remove();
-    modal.closeModal(popupElement);
   });
 }
 
