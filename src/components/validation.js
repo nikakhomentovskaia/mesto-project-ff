@@ -1,14 +1,5 @@
-export const config = {
-    formSelector: '.popup__form',
-    inputSelector: '.popup__input',
-    submitButtonSelector: '.popup__button',
-    inactiveButtonClass: 'popup__button_disabled',
-    inputErrorClass: 'popup__input_type_error',
-    errorClass: 'popup__input_error_visible'
-}
-
     // Функция добавляет класс с ошибкой
-const showInputError = (formElement, inputElement, errorMessage) => {
+const showInputError = (formElement, inputElement, errorMessage, config) => {
     const errorElement = formElement.querySelector(`.popup__input-${inputElement.name}-error`);
     
     inputElement.classList.add(config.inputErrorClass);
@@ -26,12 +17,12 @@ function hideInputError(formElement, inputElement, config) {
 }
 
     // Функция проверки валидности
-const isValid = (formElement, inputElement) => {
+const isValid = (formElement, inputElement, config) => {
     inputElement.setCustomValidity(inputElement.validity.patternMismatch ? inputElement.dataset.errorMessage : "");
     if (!inputElement.validity.valid) {
-      showInputError(formElement, inputElement, inputElement.validationMessage);
+      showInputError(formElement, inputElement, inputElement.validationMessage, config);
     } else {
-      hideInputError(formElement, inputElement);
+      hideInputError(formElement, inputElement, config);
     }
 };
   
@@ -65,7 +56,7 @@ const setEventListeners = (formElement, config) => {
   
     inputList.forEach(inputElement => {
       inputElement.addEventListener("input", () => {
-        isValid(formElement, inputElement);
+        isValid(formElement, inputElement, config);
         toggleButtonState(inputList, buttonElement, config);
       });
     });
